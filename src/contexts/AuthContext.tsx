@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
 // Definimos la URL base aquí arriba para que sea fácil de mantener
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_BASE_URL = 'https://imprenta-back-1.onrender.com';
 
 interface User {
   id?: string;

@@ -1,5 +1,5 @@
 {
-<<<<<<< HEAD
+
   "name": "imprenta-frontend",
   "private": true,
   "version": "0.0.0",
@@ -42,32 +42,6 @@
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
-=======
-  "name": "imprenta-backend",
-  "version": "1.0.0",
-  "description": "Backend para sistema de imprenta",
-  "main": "server.js",
-  "scripts": {
-    "dev": "nodemon server.js",
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
-    "bcrypt": "^5.1.1",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "pdfkit": "^0.17.2",
-    "pg": "^8.12.0",
-    "pg-pool": "^3.6.1",
-    "recharts": "^3.7.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.4"
-  },
-  "engines": {
-    "node": ">=18.0.0"
->>>>>>> 930d2953c9db558ab143584c943caf55c4623161
-  }
+
+}
 }

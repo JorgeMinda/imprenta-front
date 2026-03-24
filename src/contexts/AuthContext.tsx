@@ -1,5 +1,7 @@
-// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+
+// Definimos la URL base aquí arriba para que sea fácil de mantener
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 interface User {
   id?: string;
@@ -26,15 +28,14 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user,    setUser]    = useState<User | null>(null);
-  const [token,   setToken]   = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // empieza en true hasta leer localStorage
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // ── Restaurar sesión ──────────────────────────────────────────────────────
   useEffect(() => {
     try {
       const storedToken = localStorage.getItem('token');
-      const storedUser  = localStorage.getItem('user');
+      const storedUser = localStorage.getItem('user');
       if (storedToken && storedUser) {
         setToken(storedToken);
         setUser(JSON.parse(storedUser));
@@ -43,32 +44,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
     } finally {
-      setLoading(false); // ← CRÍTICO: solo aquí se desbloquea el render
+      setLoading(false);
     }
   }, []);
 
-  // ── Login ─────────────────────────────────────────────────────────────────
   const login = async (email: string, password: string) => {
     try {
-      const res  = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
-        method:  'POST',
+      // USAMOS LA CONSTANTE API_BASE_URL QUE DEFINIMOS ARRIBA
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password }),
       });
+      
       const data = await res.json();
       if (!res.ok) return { ok: false, msg: data.msg || 'Credenciales inválidas' };
 
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user',  JSON.stringify(data.user));
+      localStorage.setItem('user', JSON.stringify(data.user));
       setToken(data.token);
       setUser(data.user);
       return { ok: true };
-    } catch {
+    } catch (error) {
+      console.error("Error en login:", error);
       return { ok: false, msg: 'No se pudo conectar al servidor' };
     }
   };
 
-  // ── Logout ────────────────────────────────────────────────────────────────
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

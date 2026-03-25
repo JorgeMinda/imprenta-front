@@ -49,12 +49,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── Login ─────────────────────────────────────────────────────────────────
   const login = async (email: string, password: string) => {
-    try {
-      const res  = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ email, password }),
-      });
+  try {
+    // Usamos '/api' directamente para que entre por el proxy de Vite
+    const res = await fetch('/api/auth/login', { 
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
       const data = await res.json();
       if (!res.ok) return { ok: false, msg: data.msg || 'Credenciales inválidas' };
 

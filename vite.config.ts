@@ -2,16 +2,25 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(), 
     tailwindcss()
   ],
+  server: {
+    proxy: {
+      // Cada vez que hagas un fetch a '/api/...' en tu código, 
+      // Vite lo redirigirá automáticamente a Render.
+      '/api': {
+        target: 'https://imprenta-back-1.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      }
+    }
+  },
   build: {
     rollupOptions: {
       output: {
-        // Esta función divide automáticamente los paquetes de node_modules
         manualChunks(id) {
           if (id.includes('node_modules')) {
             return 'vendor';
@@ -19,7 +28,6 @@ export default defineConfig({
         },
       },
     },
-    // Opcional: aumenta el límite de la advertencia si sabes que tu App es pesada
     chunkSizeWarningLimit: 1000, 
   },
 })

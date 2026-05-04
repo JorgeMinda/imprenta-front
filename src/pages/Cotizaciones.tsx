@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, XCircle, Trash2, Plus, X, Package, ChevronDown, ChevronUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Pagination, { usePagination } from '../components/Pagination';
+import { useConfirm } from '../components/ConfirmModal';
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 interface ProductoDetalle {
@@ -101,7 +103,9 @@ export default function Cotizaciones() {
   const [items,       setItems]       = useState<ItemForm[]>([itemVacio()]);
 
   const isAdminOrVendedor = ['admin', 'vendedor'].includes(user?.rol || '');
+  const { confirmar } = useConfirm();
   const isAdmin = user?.rol === 'admin';
+  const pagination = usePagination(cotizaciones);
 
   // ── Fetch ────────────────────────────────────────────────────────────────
   const fetchData = async () => {
@@ -178,7 +182,13 @@ export default function Cotizaciones() {
 
   // ── Acciones ─────────────────────────────────────────────────────────────
   const handleAprobar = async (id: number) => {
-    if (!confirm('¿Aprobar esta cotización y crear orden de trabajo?')) return;
+    const ok = await confirmar({
+      titulo:   'Aprobar cotización',
+      mensaje:  '¿Aprobar esta cotización y crear una orden de trabajo automáticamente?',
+      variante: 'success',
+      labelOk:  'Aprobar',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cotizaciones/${id}/aprobar`, {
         method: 'POST',
@@ -193,7 +203,13 @@ export default function Cotizaciones() {
   };
 
   const handleRechazar = async (id: number) => {
-    if (!confirm('¿Rechazar esta cotización?')) return;
+    const ok = await confirmar({
+      titulo:   'Rechazar cotización',
+      mensaje:  '¿Estás seguro de rechazar esta cotización?',
+      variante: 'warning',
+      labelOk:  'Rechazar',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cotizaciones/${id}/rechazar`, {
         method: 'PATCH',
@@ -208,7 +224,13 @@ export default function Cotizaciones() {
   };
 
   const handleEliminar = async (id: number) => {
-    if (!confirm('¿Eliminar esta cotización? No se puede deshacer.')) return;
+    const ok = await confirmar({
+      titulo:   'Eliminar cotización',
+      mensaje:  '¿Eliminar esta cotización? No se puede deshacer.',
+      variante: 'danger',
+      labelOk:  'Eliminar',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/cotizaciones/${id}`, {
         method: 'DELETE',
@@ -371,7 +393,7 @@ export default function Cotizaciones() {
                   </td>
                 </tr>
               ) : (
-                cotizaciones.map(c => (
+                pagination.paginated.map(c => (
                   <motion.tr key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
                     className="hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4 text-sm text-gray-300 whitespace-nowrap">
@@ -420,6 +442,7 @@ export default function Cotizaciones() {
             </tbody>
           </table>
         </div>
+        <Pagination total={pagination.total} page={pagination.page} pageSize={pagination.pageSize} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
       </motion.div>
     </div>
   );

@@ -8,6 +8,7 @@ import {
   AlertCircle, RefreshCw, Layers
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Pagination, { usePagination } from '../components/Pagination';
 import { useConfirm } from '../components/ConfirmModal';
 
 interface ItemInventario {
@@ -368,6 +369,7 @@ export default function Inventario() {
 
   const puedeEditar = user?.rol === 'admin' || user?.rol === 'vendedor';
   const { confirmar } = useConfirm();
+  const pagination = usePagination(filtered);
 
   const fetchInventario = async () => {
     setLoading(true);
@@ -533,7 +535,7 @@ export default function Inventario() {
                   </td>
                 </tr>
               ) : (
-                filtered.map(item => (
+                pagination.paginated.map(item => (
                   <tr key={item.id} className={`hover:bg-white/5 transition-colors ${item.alerta ? 'border-l-2 border-red-500/50' : ''}`}>
                     <td className="px-6 py-4">
                       <p className="text-sm font-semibold text-white">{item.material}</p>
@@ -589,6 +591,7 @@ export default function Inventario() {
             </tbody>
           </table>
         </div>
+        <Pagination total={pagination.total} page={pagination.page} pageSize={pagination.pageSize} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
       </motion.div>
 
       {/* Modales */}

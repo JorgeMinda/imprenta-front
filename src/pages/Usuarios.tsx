@@ -7,6 +7,8 @@ import {
   Shield, User, Briefcase, AlertCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Pagination, { usePagination } from '../components/Pagination';
+import { useConfirm } from '../components/ConfirmModal';
 
 interface Usuario {
   id: number;
@@ -246,6 +248,7 @@ function ModalPassword({ usuario, onClose }: { usuario: Usuario; onClose: () => 
 // ── PÁGINA PRINCIPAL ────────────────────────────────────────────────────────
 export default function Usuarios() {
   const { token, user: me } = useAuth();
+  const { confirmar } = useConfirm();
   const [usuarios, setUsuarios]   = useState<Usuario[]>([]);
   const [filtered, setFiltered]   = useState<Usuario[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -283,9 +286,16 @@ export default function Usuarios() {
       : usuarios
     );
   }, [busqueda, usuarios]);
+  const pagination = usePagination(filtered);
 
   const handleEliminar = async (u: Usuario) => {
-    if (!confirm(`¿Eliminar a "${u.nombre}"? Esta acción no se puede deshacer.`)) return;
+    const ok = await confirmar({
+      titulo:   'Eliminar usuario',
+      mensaje:  `¿Eliminar a "${u.nombre}"? Esta acción no se puede deshacer.`,
+      variante: 'danger',
+      labelOk:  'Eliminar',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/usuarios/${u.id}`, {
         method: 'DELETE',
@@ -387,7 +397,7 @@ export default function Usuarios() {
                   </td>
                 </tr>
               ) : (
-                filtered.map(u => (
+                pagination.paginated.map(u => (
                   <tr key={u.id} className={`hover:bg-white/5 transition-colors ${u.id === Number(me?.id) ? 'border-l-2 border-indigo-500/50' : ''}`}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -428,6 +438,7 @@ export default function Usuarios() {
             </tbody>
           </table>
         </div>
+        <Pagination total={pagination.total} page={pagination.page} pageSize={pagination.pageSize} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
       </motion.div>
 
       <AnimatePresence>

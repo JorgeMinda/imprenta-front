@@ -8,6 +8,7 @@ import {
   Trash2, RefreshCw, TrendingUp, Clock, Ban
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Pagination, { usePagination } from '../components/Pagination';
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 interface Factura {
@@ -207,8 +208,7 @@ export default function Facturacion() {
 
   const isAdminOrVendedor = ['admin','vendedor'].includes(user?.rol || '');
   const isAdmin           = user?.rol === 'admin';
-
-  // ── Fetch ──────────────────────────────────────────────────────────────────
+   
   const fetchData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -245,6 +245,7 @@ export default function Facturacion() {
     const matchEstado = filtroEstado === 'todos' || f.estado === filtroEstado;
     return matchBusqueda && matchEstado;
   });
+  const pagination = usePagination(filtered);
 
   // ── Acciones ───────────────────────────────────────────────────────────────
   const cambiarEstado = async (f: Factura, estado: 'pagada' | 'anulada') => {
@@ -402,7 +403,7 @@ export default function Facturacion() {
                   </td>
                 </tr>
               ) : (
-                filtered.map(f => (
+                pagination.paginated.map(f => (
                   <tr key={f.id} className="hover:bg-white/5 transition-colors group">
                     <td className="px-5 py-4">
                       <span className="font-mono text-xs text-blue-400 font-bold">{f.numero}</span>
@@ -443,6 +444,7 @@ export default function Facturacion() {
             </tbody>
           </table>
         </div>
+        <Pagination total={pagination.total} page={pagination.page} pageSize={pagination.pageSize} onPageChange={pagination.setPage} onPageSizeChange={pagination.setPageSize} />
       </motion.div>
 
       <AnimatePresence>
